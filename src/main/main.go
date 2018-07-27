@@ -106,33 +106,35 @@ func handleRequest(conn net.Conn, p pool.Pool, token string) {
 		conn.Close()
 	}()
 	log.Println("Starting new connection")
-	reader := bufio.NewReader(conn)
-	tokenMsg := json.RawMessage(token)
-	sourceMsg := json.RawMessage("server")
+	reader := bufio.NewReaderSize(conn, 1024)
+	tokenMsg := json.RawMessage("\""+token+"\"")
+	sourceMsg := json.RawMessage("\"server\"")
 	for {
+		//data := make([]byte,1024);
 		// Read the incoming connection into the buffer.
 		arrStr, err := reader.ReadBytes(0)
+		//log.Println(string(arrStr))
 		if err != nil{
-			log.Println(string(arrStr))
 			log.Println(err)
 			return
 		}
 
 		var objmap map[string]*json.RawMessage
-		err = json.Unmarshal(arrStr, &objmap)
+		err = json.Unmarshal(arrStr[:len(arrStr)-1], &objmap)
 		if err != nil{
+			log.Println(err)
 			continue
 		}
 
 		objmap["token"] = &tokenMsg
 		objmap["source"] = &sourceMsg
 
-		res, e:= json.Marshal(objmap)
+		res, e:= json.Marshal(&objmap)
 		if e != nil{
 			log.Println(e)
 			continue
 		}
-		log.Println(string(res))
+		//log.Println(string(res))
 		for i:=0; i < 3 ; i++{
 			conn, err := p.Get()
 			if err != nil{ continue }
@@ -156,6 +158,7 @@ func handleRequest(conn net.Conn, p pool.Pool, token string) {
 			conn.Close()
 			break
 		}
+
 
 	}
 }
