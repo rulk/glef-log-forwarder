@@ -129,7 +129,7 @@ func handleRequest(conn net.Conn, p pool.Pool, token string) {
 		objmap["token"] = &tokenMsg
 		objmap["source"] = &sourceMsg
 		
-		mesageStr, msgOk := objmap["message"]
+		_, msgOk := objmap["message"]
 		shMessage, shMsgOk := objmap["short_message"]
 		
 		if  !msgOk && shMsgOk{
