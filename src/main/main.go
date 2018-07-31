@@ -128,7 +128,15 @@ func handleRequest(conn net.Conn, p pool.Pool, token string) {
 
 		objmap["token"] = &tokenMsg
 		objmap["source"] = &sourceMsg
-
+		
+		mesageStr, msgOk := objmap["message"]
+		shMessage, shMsgOk := objmap["short_message"]
+		
+		if  !msgOk && shMsgOk{
+			objmap["message"] = shMessage
+			delete(objmap, "short_message")
+		}
+		
 		res, e:= json.Marshal(&objmap)
 		if e != nil{
 			log.Println(e)
